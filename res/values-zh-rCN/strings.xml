@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">PocClientTestAPK</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="calibration_time">校准时间...</string>
+    <string name="time_offset">偏移量:</string>
+    <string name="send_time">发送用时：</string>
+    <string name="recv_time">接收用时：</string>
+    <string name="test_times">测试次数:</string>
+    <string name="average">平均值：</string>
+
+</resources>
