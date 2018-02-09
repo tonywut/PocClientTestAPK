@@ -3,13 +3,10 @@ package com.meiglink.pocclienttestapk;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -26,7 +23,6 @@ public class MainActivity extends Activity {
 	private TextView TV_aver_sendtime;
 	private TextView TV_aver_recvtime;
 	private Intent mIntent;
-	private SocketService socketService;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

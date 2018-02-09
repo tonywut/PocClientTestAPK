@@ -1,9 +1,12 @@
 package com.meiglink.pocclienttestapk;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
@@ -15,14 +18,14 @@ import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 import org.apache.commons.net.ntp.TimeStamp;
 
+import com.meiglink.MsgPackage;
+
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Binder;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 
 public class SocketService extends Service {
@@ -30,14 +33,16 @@ public class SocketService extends Service {
 	public static final String TAG = "SocketService";
 	String NTPserver = "it158.xicp.net";
 	// String NTPserver = "192.168.1.99";
-	String PocServer = "192.168.43.233";
+	//String PocServer = "192.168.43.233";
 	// String PocServer = "192.168.0.105";
+	String PocServer = "it158.xicp.net";
+	//String PocServer = "192.168.1.99";
 	private int portnumber = 8888;
 	private int testtimes = 200;
 
 	Socket s = null;
-	DataOutputStream dos = null;
-	DataInputStream dis = null;
+	ObjectOutputStream dos = null;
+	ObjectInputStream dis = null;
 	private boolean bConnected = false;
 	private long timeOffset = 0;
 	private long average_sendtime = 0;
@@ -134,11 +139,8 @@ public class SocketService extends Service {
 					synchronized (syncLock) {
 						long sendStartTime = new Date().getTime() - timeOffset;
 						if (bConnected) {
-							dos.writeChar('T');
-							dos.flush();
-							dos.writeLong(sendStartTime);
-							dos.flush();
-							dos.writeUTF((count + 1) + "/" + testtimes);
+							MsgPackage msg = new MsgPackage(MsgPackage.MSG_SENDTIME, sendStartTime, (count + 1) + "/" + testtimes);
+							dos.writeObject(msg);
 							dos.flush();
 						}
 					}
@@ -159,16 +161,17 @@ public class SocketService extends Service {
 		public void run() {
 			while (bConnected) {
 				try {
-					char event = dis.readChar();
-					if (event == 'T') {
-						long sendStartTime = dis.readLong();
-						long sendEndTime = dis.readLong();
-						long recvStartTime = dis.readLong();
-						String str = dis.readUTF();
+					MsgPackage msg = null;
+					Object obj = dis.readObject();
+					if(obj != null) {
+						msg = (MsgPackage) obj;
+					}
+					System.out.println("recv End...");
+					if (msg!= null && msg.getMsgType() == MsgPackage.MSG_RECVTIME)
+					{
+						long sendtime = msg.getSendEndTime() - msg.getSendStartTime();
 						long recvEndTime = new Date().getTime() - timeOffset;
-						System.out.println("recv End...");
-						long sendtime = sendEndTime - sendStartTime;
-						long recvtime = recvEndTime - recvStartTime;
+						long recvtime = recvEndTime - msg.getRecvStartTime();
 						if (average_sendtime == 0) {
 							average_sendtime = sendtime;
 						} else {
@@ -179,11 +182,12 @@ public class SocketService extends Service {
 						} else {
 							average_recvtime = (average_recvtime + recvtime) / 2;
 						}
+
 						System.out.println("sendtime:" + sendtime + " recvtime:" + recvtime + " average_sendtime"
 								+ average_sendtime + " average_recvtime" + average_recvtime);
 						Intent broadIntent = new Intent("com.meiglink.pocclienttestapk.socketmsg");
 						broadIntent.putExtra("msgtype", Common.MSG_TEST_TIME);
-						broadIntent.putExtra("msg", getString(R.string.test_times) + str);
+						broadIntent.putExtra("msg", getString(R.string.test_times) + msg.getStr());
 						sendBroadcast(broadIntent);
 						broadIntent.putExtra("msgtype", Common.MSG_UPDATE_SENDTIME);
 						broadIntent.putExtra("msg", getString(R.string.send_time) + sendtime);
@@ -197,10 +201,6 @@ public class SocketService extends Service {
 						broadIntent.putExtra("msgtype", Common.MSG_UPDATE_AVER_RECVTIME);
 						broadIntent.putExtra("msg", getString(R.string.average) + average_recvtime);
 						sendBroadcast(broadIntent);
-
-					} else {
-						String str = dis.readUTF();
-						System.out.println(str);
 					}
 					Thread.sleep(0);
 				} catch (SocketException e) {
@@ -218,6 +218,9 @@ public class SocketService extends Service {
 					e.printStackTrace();
 					// thread.interrupt()执行后会立刻进入catch
 					return;
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}
@@ -230,9 +233,8 @@ public class SocketService extends Service {
 					Thread.sleep(5000);
 					synchronized (syncLock) {
 						if (bConnected) {
-							dos.writeChar('H');
-							dos.flush();
-							dos.writeUTF("hearbeat");
+							MsgPackage msg = new MsgPackage(MsgPackage.MSG_HEARBEAT, "hearbeat");
+							dos.writeObject(msg);
 							dos.flush();
 						}
 					}
@@ -251,8 +253,8 @@ public class SocketService extends Service {
 	public void connect(int port) {
 		try {
 			s = new Socket(PocServer, port);
-			dos = new DataOutputStream(s.getOutputStream());
-			dis = new DataInputStream(s.getInputStream());
+			dos = new ObjectOutputStream(s.getOutputStream());
+			dis = new ObjectInputStream(new BufferedInputStream(s.getInputStream()));
 			System.out.println("~~~~connect success~~~~~!");
 			bConnected = true;
 		} catch (IOException e) {
@@ -264,7 +266,6 @@ public class SocketService extends Service {
 	public void disconnect() {
 		try {
 			bConnected = false;
-
 			tSocketThread.interrupt();
 			tHeartbeat.interrupt();
 			tRecv.interrupt();
