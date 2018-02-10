@@ -29,7 +29,8 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/TV_calibration"
         android:layout_below="@+id/TV_calibration"
-        android:text="" />
+        android:text="0" />
+
     <TextView
         android:id="@+id/TV_sendtime_average"
         android:layout_width="wrap_content"
@@ -45,8 +46,8 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/TV_sendtime"
         android:layout_below="@+id/TV_sendtime"
-        android:text="" />
-    
+        android:text="0" />
+
     <TextView
         android:id="@+id/TV_recvtime_average"
         android:layout_width="wrap_content"
@@ -55,5 +56,48 @@
         android:layout_alignBottom="@+id/TV_recvtime"
         android:layout_alignParentRight="true"
         android:text="@string/average" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/TV_recvtime"
+        android:layout_below="@+id/TV_recvtime"
+        android:text="NTPserver" />
+
+    <EditText
+        android:id="@+id/editText_NTP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/textView2"
+        android:layout_toRightOf="@+id/textView2"
+        android:ems="10" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView2"
+        android:layout_below="@+id/editText_NTP"
+        android:text="server" />
+
+    <EditText
+        android:id="@+id/editText_Service"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/textView3"
+        android:layout_toRightOf="@+id/textView3"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView3"
+        android:layout_below="@+id/editText_Service"
+        android:text="@string/readme" />
 
 </RelativeLayout>

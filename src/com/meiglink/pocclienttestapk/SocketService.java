@@ -1,8 +1,6 @@
 package com.meiglink.pocclienttestapk;
 
 import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -25,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -60,9 +59,6 @@ public class SocketService extends Service {
 		super.onCreate();
 		Log.d(TAG, "onCreate() executed");
 
-		Thread tMainThread = new Thread(new MainThread());
-		tMainThread.start();
-
 		BroadcastReceiver receiver = new BroadcastReceiver() {
 
 			@Override
@@ -92,6 +88,11 @@ public class SocketService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.d(TAG, "onStartCommand() executed");
+		Bundle bundle = intent.getExtras();
+		this.NTPserver = bundle.getString("ntpserver");
+		this.PocServer = bundle.getString("serviceIP");
+		Thread tMainThread = new Thread(new MainThread());
+		tMainThread.start();
 		return super.onStartCommand(intent, flags, startId);
 	}
 

@@ -1,6 +1,5 @@
 package com.meiglink.pocclienttestapk;
 
-
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,6 +10,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
@@ -22,7 +22,16 @@ public class MainActivity extends Activity {
 	private TextView TV_recvtime;
 	private TextView TV_aver_sendtime;
 	private TextView TV_aver_recvtime;
+	private EditText ET_NTP_service;
+	private EditText ET_SERVICE;
 	private Intent mIntent;
+
+	String NTPserver = "it158.xicp.net";
+	// String NTPserver = "192.168.1.99";
+	//String PocServer = "192.168.43.233";
+	// String PocServer = "192.168.0.105";
+	String PocServer = "it158.xicp.net";
+	//String PocServer = "192.168.1.99";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,19 +44,22 @@ public class MainActivity extends Activity {
 		TV_recvtime = (TextView) findViewById(R.id.TV_recvtime);
 		TV_aver_sendtime = (TextView) findViewById(R.id.TV_sendtime_average);
 		TV_aver_recvtime = (TextView) findViewById(R.id.TV_recvtime_average);
+		ET_NTP_service = (EditText) findViewById(R.id.editText_NTP);
+		ET_NTP_service.setText(NTPserver);
+		ET_SERVICE = (EditText) findViewById(R.id.editText_Service);
+		ET_SERVICE.setText(PocServer);
 
 		mIntent = new Intent(this, SocketService.class);
-		startService(mIntent);
-		
+
 		BroadcastReceiver receiver = new BroadcastReceiver() {
 
 			@Override
 			public void onReceive(Context context, Intent intent) {
 				// TODO Auto-generated method stub
-				Log.d(Tag , "Receiver");
+				Log.d(Tag, "Receiver");
 				int msgtype = intent.getIntExtra("msgtype", 0);
 				String str = intent.getStringExtra("msg");
-				switch(msgtype) {
+				switch (msgtype) {
 				case Common.MSG_UPDATE_CALIBRATION:
 					TV_calibration.setText(str);
 					break;
@@ -68,9 +80,8 @@ public class MainActivity extends Activity {
 					break;
 				}
 			}
-			
+
 		};
-		
 
 		IntentFilter socketMsgFilter = new IntentFilter("com.meiglink.pocclienttestapk.socketmsg");
 		registerReceiver(receiver, socketMsgFilter);
@@ -107,6 +118,12 @@ public class MainActivity extends Activity {
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch (keyCode) {
+		case KeyEvent.KEYCODE_MENU:
+		case KeyEvent.KEYCODE_DPAD_UP:
+			mIntent.putExtra("ntpserver", ET_NTP_service.getText().toString());
+			mIntent.putExtra("serviceIP", ET_NTP_service.getText().toString());
+			startService(mIntent);
+			return true;
 		case KeyEvent.KEYCODE_VOLUME_UP:
 			Intent broadIntent = new Intent("com.meiglink.pocclienttestapk.activitymsg");
 			broadIntent.putExtra("action", Common.ACTION_START_SEND);
@@ -120,6 +137,5 @@ public class MainActivity extends Activity {
 		return super.onKeyDown(keyCode, event);
 
 	}
-
 
 }
