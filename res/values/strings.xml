@@ -11,5 +11,6 @@
     <string name="test_times">test times:</string>
     <string name="average">average</string>
     <string name="readme">KEY_MENU or KEY_UP: start service. \nKEY_VOLUME_UP: start send msg.\nKEY_VOLUME_UP:stop service.</string>
+    <string name="talk">Talk</string>
 
 </resources>

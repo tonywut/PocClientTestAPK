@@ -9,4 +9,6 @@ public class Common {
 	static final int MSG_UPDATE_AVER_RECVTIME = 6;
 	
 	static final int ACTION_START_SEND = 0;
+	static final int ACTION_START_RECORD = 1;
+	static final int ACTION_STOP_RECORD = 2;
 }
